@@ -1,0 +1,33 @@
+data_ingestion:
+  data_url: "https://raw.githubusercontent.com/campusx-official/jupyter-masterclass/main/tweet_emotions.csv"
+  test_size: 0.2
+  random_state: 42
+
+data_preprocessing:
+  input_dir: "data/raw"
+  output_dir: "data/interim"
+  train_filename: "train.csv"
+  test_filename: "test.csv"
+  train_processed_filename: "train_processed.csv"
+  test_processed_filename: "test_processed.csv"
+  text_column: "content"
+  min_words: 3
+
+feature_engineering:
+  train_input: "data/interim/train_processed.csv"
+  test_input: "data/interim/test_processed.csv"
+  max_features: 5000
+  train_output: "data/processed/train_tfidf.csv"
+  test_output: "data/processed/test_tfidf.csv"
+
+model_building:
+  train_input: "data/processed/train_tfidf.csv"
+  n_estimators: 100
+  learning_rate: 0.1
+  random_state: 42
+  model_output: "models/model.pkl"
+
+model_evaluation:
+  model_input: "models/model.pkl"
+  test_input: "data/processed/test_tfidf.csv"
+  metrics_output: "reports/metrics.json"
