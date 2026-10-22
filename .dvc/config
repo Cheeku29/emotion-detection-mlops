@@ -1,0 +1,4 @@
+[core]
+    remote = myremote
+['remote "myremote"']
+    url = C:\Users\gupta\AppData\Local\Temp\emotion-detection-data
