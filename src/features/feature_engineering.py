@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 import yaml
 import logging
 
@@ -56,7 +56,7 @@ def apply_bow(
     test_data: pd.DataFrame,
     max_features: int
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Apply TF-IDF to the data."""
+    """Apply CountVectorizer to the data."""
     try:
         required_columns = ['content', 'sentiment']
 
@@ -64,7 +64,7 @@ def apply_bow(
             if column not in train_data.columns or column not in test_data.columns:
                 raise ValueError(f'Missing required column: {column}')
 
-        vectorizer = TfidfVectorizer(max_features=max_features)
+        vectorizer = CountVectorizer(max_features=max_features)
 
         X_train = train_data['content'].astype(str).values
         y_train = train_data['sentiment'].values
@@ -80,11 +80,11 @@ def apply_bow(
         test_df = pd.DataFrame(X_test_bow.toarray())
         test_df['label'] = y_test
 
-        logger.debug('TF-IDF applied and data transformed')
+        logger.debug('Bag-of-Words applied and data transformed')
         return train_df, test_df
 
     except Exception:
-        logger.exception('Error during TF-IDF transformation')
+        logger.exception('Error during BOW transformation')
         raise
 
 

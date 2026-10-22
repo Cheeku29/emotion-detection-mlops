@@ -32,7 +32,7 @@ stages:
     cmd: uv run python src/models/model_building.py
     deps:
       - src/models/model_building.py
-      - data/processed/train_tfidf.csv
+      - data/processed/train_bow.csv
     params:
       - model_building
     outs:
@@ -43,7 +43,7 @@ stages:
     deps:
       - src/models/model_evaluation.py
       - models/model.pkl
-      - data/processed/test_tfidf.csv
+      - data/processed/test_bow.csv
     params:
       - model_evaluation
     outs:

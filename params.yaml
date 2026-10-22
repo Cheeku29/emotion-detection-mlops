@@ -17,11 +17,11 @@ feature_engineering:
   train_input: "data/interim/train_processed.csv"
   test_input: "data/interim/test_processed.csv"
   max_features: 5000
-  train_output: "data/processed/train_tfidf.csv"
-  test_output: "data/processed/test_tfidf.csv"
+  train_output: "data/processed/train_bow.csv"
+  test_output: "data/processed/test_bow.csv"
 
 model_building:
-  train_input: "data/processed/train_tfidf.csv"
+  train_input: "data/processed/train_bow.csv"
   n_estimators: 100
   learning_rate: 0.1
   random_state: 42
@@ -29,5 +29,5 @@ model_building:
 
 model_evaluation:
   model_input: "models/model.pkl"
-  test_input: "data/processed/test_tfidf.csv"
+  test_input: "data/processed/test_bow.csv"
   metrics_output: "reports/metrics.json"
