@@ -1,0 +1,127 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: uv run python src/data/data_ingestion.py
+    deps:
+    - path: src/data/data_ingestion.py
+      hash: md5
+      md5: 281333dd0e507deed4560364743f73ac
+      size: 3754
+    params:
+      params.yaml:
+        data_ingestion:
+          data_url: 
+            https://raw.githubusercontent.com/campusx-official/jupyter-masterclass/main/tweet_emotions.csv
+          test_size: 0.2
+          random_state: 42
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: fb326d2eec197669f9638afde28356bf.dir
+      size: 827973
+      nfiles: 2
+  data_preprocessing:
+    cmd: uv run python src/data/data_preprocessing.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: fb326d2eec197669f9638afde28356bf.dir
+      size: 827973
+      nfiles: 2
+    - path: src/data/data_preprocessing.py
+      hash: md5
+      md5: a08a3bb4eb7098e7ead05a597196fb37
+      size: 5793
+    params:
+      params.yaml:
+        data_preprocessing:
+          input_dir: data/raw
+          output_dir: data/interim
+          train_filename: train.csv
+          test_filename: test.csv
+          train_processed_filename: train_processed.csv
+          test_processed_filename: test_processed.csv
+          text_column: content
+          min_words: 3
+    outs:
+    - path: data/interim
+      hash: md5
+      md5: 2a3bb7beb4ebbf333979201e05dc7467.dir
+      size: 549197
+      nfiles: 2
+  feature_engineering:
+    cmd: uv run python src/features/feature_engineering.py
+    deps:
+    - path: data/interim
+      hash: md5
+      md5: 2a3bb7beb4ebbf333979201e05dc7467.dir
+      size: 549197
+      nfiles: 2
+    - path: src/features/feature_engineering.py
+      hash: md5
+      md5: 100e0801ad79d8b55338858e67174655
+      size: 3788
+    params:
+      params.yaml:
+        feature_engineering:
+          train_input: data/interim/train_processed.csv
+          test_input: data/interim/test_processed.csv
+          max_features: 5000
+          train_output: data/processed/train_tfidf.csv
+          test_output: data/processed/test_tfidf.csv
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 46547577c6555dfab34f49ddec9b5633.dir
+      size: 198458382
+      nfiles: 2
+  model_building:
+    cmd: uv run python src/models/model_building.py
+    deps:
+    - path: data/processed/train_tfidf.csv
+      hash: md5
+      md5: 49069b4df1f9e813395e6a1f7d704e0d
+      size: 158948465
+    - path: src/models/model_building.py
+      hash: md5
+      md5: 99a0a0eff101afa17424d8708b2c3d57
+      size: 3044
+    params:
+      params.yaml:
+        model_building:
+          train_input: data/processed/train_tfidf.csv
+          n_estimators: 100
+          learning_rate: 0.1
+          random_state: 42
+          model_output: models/model.pkl
+    outs:
+    - path: models/model.pkl
+      hash: md5
+      md5: 617ff6467f370b2ad0127e2579beeef9
+      size: 131803
+  model_evaluation:
+    cmd: uv run python src/models/model_evaluation.py
+    deps:
+    - path: data/processed/test_tfidf.csv
+      hash: md5
+      md5: 207860af7f72093fe2c7af131661593a
+      size: 39509917
+    - path: models/model.pkl
+      hash: md5
+      md5: 617ff6467f370b2ad0127e2579beeef9
+      size: 131803
+    - path: src/models/model_evaluation.py
+      hash: md5
+      md5: f7dbf78283234dd206a8e7f27cf5a62d
+      size: 4089
+    params:
+      params.yaml:
+        model_evaluation:
+          model_input: models/model.pkl
+          test_input: data/processed/test_tfidf.csv
+          metrics_output: reports/metrics.json
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: 04fbcfe43e8cbff1bbeeb33a944217f2
+      size: 144
