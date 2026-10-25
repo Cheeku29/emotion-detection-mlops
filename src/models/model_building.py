@@ -1,29 +1,39 @@
-import numpy as np
-import pandas as pd
 import os
-import pickle
-from sklearn.ensemble import GradientBoostingClassifier
-import yaml
 import logging
+import pickle
+import pandas as pd
+import yaml
+import mlflow
+import mlflow.sklearn
+import dagshub
 
-
-# logging configuration
-logger = logging.getLogger('model_building')
-logger.setLevel('DEBUG')
-
-console_handler = logging.StreamHandler()
-console_handler.setLevel('DEBUG')
-
-file_handler = logging.FileHandler('model_building_errors.log')
-file_handler.setLevel('ERROR')
-
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score
 )
-console_handler.setFormatter(formatter)
-file_handler.setFormatter(formatter)
+
+
+# Logging configuration
+logger = logging.getLogger("model_building")
+logger.setLevel(logging.DEBUG)
 
 if not logger.handlers:
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+
+    file_handler = logging.FileHandler("model_building_errors.log")
+    file_handler.setLevel(logging.ERROR)
+
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+
+    console_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
+
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
 
@@ -31,12 +41,14 @@ if not logger.handlers:
 def load_params(params_path: str) -> dict:
     """Load parameters from a YAML file."""
     try:
-        with open(params_path, 'r', encoding='utf-8') as file:
+        with open(params_path, "r", encoding="utf-8") as file:
             params = yaml.safe_load(file)
-        logger.debug('Parameters retrieved from %s', params_path)
+
+        logger.debug("Parameters retrieved from %s", params_path)
         return params
+
     except Exception:
-        logger.exception('Failed to load parameters')
+        logger.exception("Failed to load parameters")
         raise
 
 
@@ -44,69 +56,142 @@ def load_data(file_path: str) -> pd.DataFrame:
     """Load data from a CSV file."""
     try:
         df = pd.read_csv(file_path)
-        logger.debug('Data loaded from %s', file_path)
+        logger.debug("Data loaded from %s", file_path)
         return df
+
     except Exception:
-        logger.exception('Failed to load data from %s', file_path)
+        logger.exception("Failed to load data from %s", file_path)
         raise
 
 
 def train_model(
-    X_train: np.ndarray,
-    y_train: np.ndarray,
+    X_train,
+    y_train,
     params: dict
-) -> GradientBoostingClassifier:
-    """Train the Gradient Boosting model."""
+) -> LogisticRegression:
+    """Train Logistic Regression using the selected hyperparameters."""
     try:
-        clf = GradientBoostingClassifier(
-            n_estimators=params['n_estimators'],
-            learning_rate=params['learning_rate'],
-            random_state=params['random_state']
+        model = LogisticRegression(
+            C=params["C"],
+            penalty=params["penalty"],
+            solver=params["solver"],
+            max_iter=params.get("max_iter", 1000),
+            random_state=params.get("random_state", 42)
         )
 
-        clf.fit(X_train, y_train)
-        logger.debug('Model training completed')
-        return clf
+        model.fit(X_train, y_train)
+
+        logger.debug("Logistic Regression training completed")
+        return model
 
     except Exception:
-        logger.exception('Error during model training')
+        logger.exception("Error during model training")
         raise
 
 
-def save_model(model: GradientBoostingClassifier, file_path: str) -> None:
-    """Save the trained model to a file."""
+def save_model(model, file_path: str) -> None:
+    """Save the trained model using pickle."""
     try:
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        directory = os.path.dirname(file_path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
 
-        with open(file_path, 'wb') as file:
+        with open(file_path, "wb") as file:
             pickle.dump(model, file)
 
-        logger.debug('Model saved to %s', file_path)
+        logger.debug("Model saved to %s", file_path)
 
     except Exception:
-        logger.exception('Error occurred while saving the model')
+        logger.exception("Error occurred while saving the model")
         raise
 
 
 def main() -> None:
     try:
-        params = load_params('params.yaml')['model_building']
+        config = load_params("params.yaml")["model_building"]
 
-        train_data = load_data(params['train_input'])
+        # Initialize DagsHub MLflow tracking
+        dagshub.init(
+            repo_owner="Cheeku29",
+            repo_name="emotion-detection-mlops",
+            mlflow=True
+        )
 
-        X_train = train_data.drop(columns=['label']).values
-        y_train = train_data['label'].values
+        mlflow.set_experiment(
+            "Emotion Detection - Model Building"
+        )
 
-        clf = train_model(X_train, y_train, params)
+        with mlflow.start_run(
+            run_name="Logistic Regression - BoW Tuned"
+        ):
+            train_data = load_data(config["train_input"])
+            test_data = load_data(config["test_input"])
 
-        save_model(clf, params['model_output'])
+            # Separate features and target
+            X_train = train_data.drop(columns=["label"]).values
+            y_train = train_data["label"].values
 
-        logger.debug('Model building completed successfully')
+            X_test = test_data.drop(columns=["label"]).values
+            y_test = test_data["label"].values
+
+            # Use the best hyperparameters from GridSearchCV
+            model_params = {
+                "C": config.get("C", 1),
+                "penalty": config.get("penalty", "l1"),
+                "solver": config.get("solver", "liblinear"),
+                "max_iter": config.get("max_iter", 1000),
+                "random_state": config.get("random_state", 42)
+            }
+
+            mlflow.log_params(model_params)
+
+            mlflow.log_params({
+                "model_type": "LogisticRegression",
+                "feature_representation": "BoW"
+            })
+
+            # Train model
+            model = train_model(
+                X_train,
+                y_train,
+                model_params
+            )
+
+            # Evaluate on the test set
+            y_pred = model.predict(X_test)
+
+            metrics = {
+                "accuracy": accuracy_score(y_test, y_pred),
+                "precision": precision_score(
+                    y_test, y_pred, zero_division=0
+                ),
+                "recall": recall_score(
+                    y_test, y_pred, zero_division=0
+                ),
+                "f1_score": f1_score(
+                    y_test, y_pred, zero_division=0
+                )
+            }
+
+            mlflow.log_metrics(metrics)
+
+            # Save local model for compatibility with DVC
+            save_model(model, config["model_output"])
+
+            # Log model artifact to MLflow
+            mlflow.sklearn.log_model(
+                model,
+                name="model",
+                serialization_format="pickle"
+            )
+
+            logger.info("Test metrics: %s", metrics)
+            logger.debug("Model building completed successfully")
 
     except Exception:
-        logger.exception('Failed to complete model building')
+        logger.exception("Failed to complete model building")
         raise
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -22,8 +22,10 @@ feature_engineering:
 
 model_building:
   train_input: "data/processed/train_bow.csv"
-  n_estimators: 100
-  learning_rate: 0.1
+  C: 1
+  penalty: "l1"
+  solver: "liblinear"
+  max_iter: 1000
   random_state: 42
   model_output: "models/model.pkl"
 
