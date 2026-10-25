@@ -106,6 +106,7 @@ def save_model(model, file_path: str) -> None:
         raise
 
 
+
 def main() -> None:
     try:
         config = load_params("params.yaml")["model_building"]
@@ -117,24 +118,18 @@ def main() -> None:
             mlflow=True
         )
 
-        mlflow.set_experiment(
-            "Emotion Detection - Model Building"
-        )
+        mlflow.set_experiment("Emotion Detection - Model Building")
 
         with mlflow.start_run(
             run_name="Logistic Regression - BoW Tuned"
         ):
             train_data = load_data(config["train_input"])
-            test_data = load_data(config["test_input"])
 
             # Separate features and target
             X_train = train_data.drop(columns=["label"]).values
             y_train = train_data["label"].values
 
-            X_test = test_data.drop(columns=["label"]).values
-            y_test = test_data["label"].values
-
-            # Use the best hyperparameters from GridSearchCV
+            # Best hyperparameters from GridSearchCV
             model_params = {
                 "C": config.get("C", 1),
                 "penalty": config.get("penalty", "l1"),
@@ -144,7 +139,6 @@ def main() -> None:
             }
 
             mlflow.log_params(model_params)
-
             mlflow.log_params({
                 "model_type": "LogisticRegression",
                 "feature_representation": "BoW"
@@ -157,25 +151,7 @@ def main() -> None:
                 model_params
             )
 
-            # Evaluate on the test set
-            y_pred = model.predict(X_test)
-
-            metrics = {
-                "accuracy": accuracy_score(y_test, y_pred),
-                "precision": precision_score(
-                    y_test, y_pred, zero_division=0
-                ),
-                "recall": recall_score(
-                    y_test, y_pred, zero_division=0
-                ),
-                "f1_score": f1_score(
-                    y_test, y_pred, zero_division=0
-                )
-            }
-
-            mlflow.log_metrics(metrics)
-
-            # Save local model for compatibility with DVC
+            # Save local model for DVC
             save_model(model, config["model_output"])
 
             # Log model artifact to MLflow
@@ -185,8 +161,7 @@ def main() -> None:
                 serialization_format="pickle"
             )
 
-            logger.info("Test metrics: %s", metrics)
-            logger.debug("Model building completed successfully")
+            logger.info("Model training and logging completed successfully")
 
     except Exception:
         logger.exception("Failed to complete model building")

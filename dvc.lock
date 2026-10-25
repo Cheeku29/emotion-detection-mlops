@@ -3,10 +3,14 @@ stages:
   data_ingestion:
     cmd: uv run python src/data/data_ingestion.py
     deps:
+    - path: params.yaml
+      hash: md5
+      md5: 83d9b68789f3a86a8524ea66c4bcd87d
+      size: 1016
     - path: src/data/data_ingestion.py
       hash: md5
-      md5: 281333dd0e507deed4560364743f73ac
-      size: 3754
+      md5: ef0406668b96f738e531181ba942e5fe
+      size: 4802
     params:
       params.yaml:
         data_ingestion:
@@ -17,7 +21,7 @@ stages:
     outs:
     - path: data/raw
       hash: md5
-      md5: fb326d2eec197669f9638afde28356bf.dir
+      md5: 48dea689a9c68a453910c365f9926260.dir
       size: 827973
       nfiles: 2
   data_preprocessing:
@@ -25,13 +29,17 @@ stages:
     deps:
     - path: data/raw
       hash: md5
-      md5: fb326d2eec197669f9638afde28356bf.dir
+      md5: 48dea689a9c68a453910c365f9926260.dir
       size: 827973
       nfiles: 2
+    - path: params.yaml
+      hash: md5
+      md5: 83d9b68789f3a86a8524ea66c4bcd87d
+      size: 1016
     - path: src/data/data_preprocessing.py
       hash: md5
-      md5: a08a3bb4eb7098e7ead05a597196fb37
-      size: 5793
+      md5: d5356aad3cbaca443fb645934a79b1d3
+      size: 7647
     params:
       params.yaml:
         data_preprocessing:
@@ -46,7 +54,7 @@ stages:
     outs:
     - path: data/interim
       hash: md5
-      md5: 2a3bb7beb4ebbf333979201e05dc7467.dir
+      md5: deef0c8763c71574c6bbea3b938c2d9d.dir
       size: 549197
       nfiles: 2
   feature_engineering:
@@ -54,13 +62,17 @@ stages:
     deps:
     - path: data/interim
       hash: md5
-      md5: 2a3bb7beb4ebbf333979201e05dc7467.dir
+      md5: deef0c8763c71574c6bbea3b938c2d9d.dir
       size: 549197
       nfiles: 2
+    - path: params.yaml
+      hash: md5
+      md5: 83d9b68789f3a86a8524ea66c4bcd87d
+      size: 1016
     - path: src/features/feature_engineering.py
       hash: md5
-      md5: f373a4db754340c058b6da32707de230
-      size: 3800
+      md5: e374e7e193ece74101ef929942fa6b25
+      size: 6162
     params:
       params.yaml:
         feature_engineering:
@@ -72,8 +84,8 @@ stages:
     outs:
     - path: data/processed
       hash: md5
-      md5: 27d47927a83e8e65ff3fb12af0d61254.dir
-      size: 98737392
+      md5: 4e9069c62c65f84cb0e0a52e1b3b4509.dir
+      size: 98739082
       nfiles: 2
   model_building:
     cmd: uv run python src/models/model_building.py
