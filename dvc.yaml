@@ -53,3 +53,10 @@ stages:
       - model_evaluation
     metrics:
       - reports/metrics.json
+
+  model_registration:
+    cmd: uv run python src/models/model_registration.py
+    deps:
+      - src/models/model_registration.py
+      - reports/experiment_info.json
+      - reports/metrics.json

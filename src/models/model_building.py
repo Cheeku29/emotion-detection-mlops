@@ -6,6 +6,7 @@ import yaml
 import mlflow
 import mlflow.sklearn
 import dagshub
+import json
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
@@ -161,7 +162,20 @@ def main() -> None:
                 serialization_format="pickle"
             )
 
-            logger.info("Model training and logging completed successfully")
+            # Save information needed for model registration
+            model_info = {
+                "run_id": mlflow.active_run().info.run_id,
+                "model_path": "model"
+            }
+
+            os.makedirs("reports", exist_ok=True)
+
+            with open("reports/experiment_info.json", "w", encoding="utf-8") as file:
+                json.dump(model_info, file, indent=4)
+
+            mlflow.log_artifact("reports/experiment_info.json")
+
+            logger.info("Model and experiment information saved successfully")
 
     except Exception:
         logger.exception("Failed to complete model building")
