@@ -30,6 +30,7 @@ stages:
       - feature_engineering
     outs:
       - data/processed
+      - models/vectorizer.pkl
 
   model_building:
     cmd: uv run python src/models/model_building.py

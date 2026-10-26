@@ -4,6 +4,7 @@ import pandas as pd
 import yaml
 import mlflow
 import dagshub
+import pickle
 
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -91,15 +92,21 @@ def apply_bow(
         # Keep CSV output format for compatibility with the existing DVC pipeline
         feature_names = vectorizer.get_feature_names_out()
 
+        train_feature_names = list(feature_names)
+        if "label" in train_feature_names:
+            train_feature_names[
+                train_feature_names.index("label")
+            ] = "__bow_label"
+
         train_df = pd.DataFrame(
             X_train_bow.toarray(),
-            columns=feature_names
+            columns=train_feature_names
         )
         train_df["label"] = y_train
 
         test_df = pd.DataFrame(
             X_test_bow.toarray(),
-            columns=feature_names
+            columns=train_feature_names
         )
         test_df["label"] = y_test
 
@@ -174,6 +181,21 @@ def main() -> None:
             # Save the feature matrices
             save_data(train_df, config["train_output"])
             save_data(test_df, config["test_output"])
+
+            # Save fitted vectorizer for Flask inference
+            vectorizer_path = "models/vectorizer.pkl"
+            os.makedirs("models", exist_ok=True)
+
+            with open(vectorizer_path, "wb") as file:
+                pickle.dump(vectorizer, file)
+
+            logger.info("Vectorizer saved to %s", vectorizer_path)
+
+            # Log vectorizer as an MLflow artifact
+            mlflow.log_artifact(
+                vectorizer_path,
+                artifact_path="vectorizer"
+            )
 
             # Log output statistics
             mlflow.log_metrics({
