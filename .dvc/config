@@ -1,4 +1,5 @@
 [core]
     remote = myremote
 ['remote "myremote"']
-    url = C:\Users\gupta\AppData\Local\Temp\emotion-detection-data
+    url = s3://emotion-detection-mlops-arindam/emotion-detection
+    region = ap-southeast-2

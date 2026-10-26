@@ -92,40 +92,50 @@ stages:
     deps:
     - path: data/processed/train_bow.csv
       hash: md5
-      md5: 0a39232a809ae3a5faebe168280d1347
-      size: 79067603
+      md5: dd421aa3871e4bce3f567b6d05ecb9eb
+      size: 78872491
+    - path: params.yaml
+      hash: md5
+      md5: 83d9b68789f3a86a8524ea66c4bcd87d
+      size: 1016
     - path: src/models/model_building.py
       hash: md5
-      md5: 99a0a0eff101afa17424d8708b2c3d57
-      size: 3044
+      md5: 35dedab122f1e98541f789e768bde949
+      size: 4727
     params:
       params.yaml:
         model_building:
           train_input: data/processed/train_bow.csv
-          n_estimators: 100
-          learning_rate: 0.1
+          C: 1
+          penalty: l1
+          solver: liblinear
+          max_iter: 1000
           random_state: 42
           model_output: models/model.pkl
     outs:
     - path: models/model.pkl
       hash: md5
-      md5: 47022e7da8b1b9fb835fee24c0b6fc98
-      size: 132379
+      md5: f16b1e96c796fe6dfca06dd051b44384
+      size: 40711
   model_evaluation:
     cmd: uv run python src/models/model_evaluation.py
     deps:
     - path: data/processed/test_bow.csv
       hash: md5
-      md5: de266d65a008263aac697ada220b6046
-      size: 19669789
+      md5: 37971ccf5c750743ddbb171e14cea6c6
+      size: 19866591
     - path: models/model.pkl
       hash: md5
-      md5: 47022e7da8b1b9fb835fee24c0b6fc98
-      size: 132379
+      md5: f16b1e96c796fe6dfca06dd051b44384
+      size: 40711
+    - path: params.yaml
+      hash: md5
+      md5: 83d9b68789f3a86a8524ea66c4bcd87d
+      size: 1016
     - path: src/models/model_evaluation.py
       hash: md5
-      md5: f7dbf78283234dd206a8e7f27cf5a62d
-      size: 4089
+      md5: 01c8137c58a7e833aa98359b18c645d7
+      size: 5680
     params:
       params.yaml:
         model_evaluation:
@@ -135,5 +145,5 @@ stages:
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: e37c874a2c804c0ecb4b706d37df81d4
-      size: 145
+      md5: 86067cbfd1b259079c1622ab1bb1f52a
+      size: 181
