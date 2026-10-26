@@ -63,6 +63,13 @@ def main():
         version=registered_model.version
     )
 
+    client.transition_model_version_stage(
+        name=model_name,
+        version=registered_model.version,
+        stage="Staging",
+        archive_existing_versions=True
+    )
+
     logger.info(
         "Model version %s assigned alias 'staging'",
         registered_model.version

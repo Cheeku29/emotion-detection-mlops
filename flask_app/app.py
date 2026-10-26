@@ -7,7 +7,6 @@ import mlflow.sklearn
 import pandas as pd
 
 from flask import Flask, render_template, request
-from mlflow import MlflowClient
 
 from flask_app.preprocessing_utility import normalize_text
 
@@ -21,28 +20,9 @@ dagshub.init(
 app = Flask(__name__)
 
 MODEL_NAME = "emotion-detection-model"
+MODEL_ALIAS = "staging"
 
-client = MlflowClient()
-
-# Load the newest registered model version
-versions = client.search_model_versions(
-    f"name='{MODEL_NAME}'"
-)
-
-if not versions:
-    raise RuntimeError(
-        f"No registered versions found for {MODEL_NAME}"
-    )
-
-latest_version = max(
-    versions,
-    key=lambda version: int(version.version)
-)
-
-model_uri = (
-    f"models:/{MODEL_NAME}/{latest_version.version}"
-)
-
+model_uri = f"models:/{MODEL_NAME}@{MODEL_ALIAS}"
 model = mlflow.sklearn.load_model(model_uri)
 
 # Load the fitted vectorizer
