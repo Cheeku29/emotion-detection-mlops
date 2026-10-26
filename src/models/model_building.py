@@ -156,22 +156,22 @@ def main() -> None:
             save_model(model, config["model_output"])
 
             # Log model artifact to MLflow
-            mlflow.sklearn.log_model(
-                model,
+            model_info = mlflow.sklearn.log_model(
+                sk_model=model,
                 name="model",
                 serialization_format="pickle"
             )
 
             # Save information needed for model registration
-            model_info = {
+            experiment_info = {
                 "run_id": mlflow.active_run().info.run_id,
-                "model_path": "model"
+                "model_uri": model_info.model_uri
             }
 
             os.makedirs("reports", exist_ok=True)
 
             with open("reports/experiment_info.json", "w", encoding="utf-8") as file:
-                json.dump(model_info, file, indent=4)
+                json.dump(experiment_info, file, indent=4)
 
             mlflow.log_artifact("reports/experiment_info.json")
 

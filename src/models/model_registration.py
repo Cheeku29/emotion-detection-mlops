@@ -39,11 +39,8 @@ def main():
     with open(model_info_path, "r", encoding="utf-8") as file:
         model_info = json.load(file)
 
-    run_id = model_info["run_id"]
-    model_path = model_info["model_path"]
-
     model_name = "emotion-detection-model"
-    model_uri = f"runs:/{run_id}/{model_path}"
+    model_uri = model_info["model_uri"]
 
     client = MlflowClient()
 
