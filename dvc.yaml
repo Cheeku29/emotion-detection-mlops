@@ -1,6 +1,6 @@
 stages:
   data_ingestion:
-    cmd: uv run python src/data/data_ingestion.py
+    cmd: uv run python -m src.data.data_ingestion
     deps:
       - src/data/data_ingestion.py
       - params.yaml
@@ -10,7 +10,7 @@ stages:
       - data/raw
 
   data_preprocessing:
-    cmd: uv run python src/data/data_preprocessing.py
+    cmd: uv run python -m src.data.data_preprocessing
     deps:
       - src/data/data_preprocessing.py
       - data/raw
@@ -21,7 +21,7 @@ stages:
       - data/interim
 
   feature_engineering:
-    cmd: uv run python src/features/feature_engineering.py
+    cmd: uv run python -m src.features.feature_engineering
     deps:
       - src/features/feature_engineering.py
       - data/interim
@@ -33,7 +33,7 @@ stages:
       - models/vectorizer.pkl
 
   model_building:
-    cmd: uv run python src/models/model_building.py
+    cmd: uv run python -m src.models.model_building
     deps:
       - src/models/model_building.py
       - data/processed/train_bow.csv
@@ -44,7 +44,7 @@ stages:
       - models/model.pkl
 
   model_evaluation:
-    cmd: uv run python src/models/model_evaluation.py
+    cmd: uv run python -m src.models.model_evaluation
     deps:
       - src/models/model_evaluation.py
       - models/model.pkl
@@ -56,7 +56,7 @@ stages:
       - reports/metrics.json
 
   model_registration:
-    cmd: uv run python src/models/model_registration.py
+    cmd: uv run python -m src.models.model_registration
     deps:
       - src/models/model_registration.py
       - reports/experiment_info.json
