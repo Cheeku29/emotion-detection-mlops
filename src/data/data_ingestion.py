@@ -3,9 +3,9 @@ import logging
 import pandas as pd
 import yaml
 import mlflow
-import dagshub
 
 from sklearn.model_selection import train_test_split
+from src.mlflow_setup import configure_dagshub
 
 # Logging configuration
 logger = logging.getLogger("data_ingestion")
@@ -113,12 +113,7 @@ def main() -> None:
         random_state = config["random_state"]
         data_url = config["data_url"]
 
-        # Configure DagsHub MLflow tracking
-        dagshub.init(
-            repo_owner="Cheeku29",
-            repo_name="emotion-detection-mlops",
-            mlflow=True
-        )
+        configure_dagshub()
 
         mlflow.set_experiment("Emotion Detection - Data Ingestion")
 
