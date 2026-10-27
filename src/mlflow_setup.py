@@ -19,6 +19,8 @@ def configure_dagshub() -> None:
     os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
     os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
+    dagshub.auth.add_app_token(dagshub_token)
+
     dagshub.init(
         repo_owner=REPO_OWNER,
         repo_name=REPO_NAME,
