@@ -153,7 +153,7 @@ def main() -> None:
             # Log model artifact to MLflow
             model_info = mlflow.sklearn.log_model(
                 sk_model=model,
-                name="model",
+                artifact_path="model",
                 serialization_format="pickle"
             )
 
