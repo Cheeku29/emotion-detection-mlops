@@ -5,11 +5,11 @@ import logging
 import pandas as pd
 import yaml
 import mlflow
-import dagshub
 
 from typing import Any
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from src.mlflow_setup import configure_dagshub
 
 
 # Logging configuration
@@ -168,12 +168,7 @@ def main() -> None:
         text_column = params["text_column"]
         min_words = params["min_words"]
 
-        # Initialize DagsHub MLflow tracking
-        dagshub.init(
-            repo_owner="Cheeku29",
-            repo_name="emotion-detection-mlops",
-            mlflow=True
-        )
+        configure_dagshub()
 
         mlflow.set_experiment(
             "Emotion Detection - Data Preprocessing"

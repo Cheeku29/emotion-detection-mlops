@@ -31,6 +31,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
+      - name: download NLTK resources
+        run: |
+          python -m nltk.downloader stopwords wordnet omw-1.4
+
       - name: run pipeline
         env:
           DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
