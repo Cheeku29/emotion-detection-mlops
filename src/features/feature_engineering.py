@@ -3,10 +3,10 @@ import logging
 import pandas as pd
 import yaml
 import mlflow
-import dagshub
 import pickle
 
 from sklearn.feature_extraction.text import CountVectorizer
+from src.mlflow_setup import configure_dagshub
 
 
 # Logging configuration
@@ -142,12 +142,7 @@ def main() -> None:
         params = load_params("params.yaml")
         config = params["feature_engineering"]
 
-        # Initialize DagsHub MLflow tracking
-        dagshub.init(
-            repo_owner="Cheeku29",
-            repo_name="emotion-detection-mlops",
-            mlflow=True
-        )
+        configure_dagshub()
 
         mlflow.set_experiment(
             "Emotion Detection - Feature Engineering"

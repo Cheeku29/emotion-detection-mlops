@@ -1,7 +1,6 @@
 
 import os
 
-import dagshub
 import mlflow
 import mlflow.sklearn
 import pandas as pd
@@ -9,13 +8,10 @@ import pandas as pd
 from flask import Flask, render_template, request
 
 from flask_app.preprocessing_utility import normalize_text
+from src.mlflow_setup import configure_dagshub
 
 
-dagshub.init(
-    repo_owner="Cheeku29",
-    repo_name="emotion-detection-mlops",
-    mlflow=True
-)
+configure_dagshub()
 
 app = Flask(__name__)
 

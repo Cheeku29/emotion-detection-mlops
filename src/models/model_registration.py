@@ -3,9 +3,9 @@ import json
 import logging
 import os
 
-import dagshub
 import mlflow
 from mlflow import MlflowClient
+from src.mlflow_setup import configure_dagshub
 
 
 logger = logging.getLogger("model_registration")
@@ -22,12 +22,7 @@ if not logger.handlers:
 
 
 def main():
-    # Configure MLflow tracking with your DagsHub repository
-    dagshub.init(
-        repo_owner="Cheeku29",
-        repo_name="emotion-detection-mlops",
-        mlflow=True
-    )
+    configure_dagshub()
 
     model_info_path = "reports/experiment_info.json"
 

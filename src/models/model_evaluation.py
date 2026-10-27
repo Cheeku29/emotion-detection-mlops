@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import yaml
 import mlflow
-import dagshub
+from src.mlflow_setup import configure_dagshub
 
 from sklearn.metrics import (
     accuracy_score,
@@ -150,12 +150,7 @@ def main() -> None:
     try:
         params = load_params("params.yaml")["model_evaluation"]
 
-        # Configure DagsHub MLflow tracking
-        dagshub.init(
-            repo_owner="Cheeku29",
-            repo_name="emotion-detection-mlops",
-            mlflow=True
-        )
+        configure_dagshub()
 
         mlflow.set_experiment(
             "Emotion Detection - Model Evaluation"
