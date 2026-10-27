@@ -16,7 +16,7 @@ configure_dagshub()
 app = Flask(__name__)
 
 MODEL_NAME = "emotion-detection-model"
-MODEL_ALIAS = "staging"
+MODEL_ALIAS = "production"
 
 model_uri = f"models:/{MODEL_NAME}@{MODEL_ALIAS}"
 model = mlflow.sklearn.load_model(model_uri)

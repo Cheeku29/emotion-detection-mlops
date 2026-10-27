@@ -51,22 +51,22 @@ def main():
         registered_model.version
     )
 
-    # Assign a staging alias to the new version
+    # Promote the tested model to the production alias and stage.
     client.set_registered_model_alias(
         name=model_name,
-        alias="staging",
+        alias="production",
         version=registered_model.version
     )
 
     client.transition_model_version_stage(
         name=model_name,
         version=registered_model.version,
-        stage="Staging",
+        stage="Production",
         archive_existing_versions=True
     )
 
     logger.info(
-        "Model version %s assigned alias 'staging'",
+        "Model version %s promoted to production",
         registered_model.version
     )
 
