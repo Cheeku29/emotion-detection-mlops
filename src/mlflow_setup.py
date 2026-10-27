@@ -1,10 +1,14 @@
 import os
 
 import dagshub
+import mlflow
 
 
 REPO_OWNER = "Cheeku29"
 REPO_NAME = "emotion-detection-mlops"
+MLFLOW_TRACKING_URI = (
+    f"https://dagshub.com/{REPO_OWNER}/{REPO_NAME}.mlflow"
+)
 
 
 def configure_dagshub() -> None:
@@ -21,8 +25,4 @@ def configure_dagshub() -> None:
 
     dagshub.auth.add_app_token(dagshub_token)
 
-    dagshub.init(
-        repo_owner=REPO_OWNER,
-        repo_name=REPO_NAME,
-        mlflow=True
-    )
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
