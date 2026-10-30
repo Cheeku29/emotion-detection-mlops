@@ -1,9 +1,9 @@
 
 import os
+import pickle
 
 import mlflow
 import mlflow.sklearn
-import pandas as pd
 
 from flask import Flask, render_template, request
 
@@ -30,10 +30,18 @@ if not os.path.exists(vectorizer_path):
         "Save the fitted vectorizer during feature engineering."
     )
 
-import pickle
-
 with open(vectorizer_path, "rb") as file:
     vectorizer = pickle.load(file)
+
+model_feature_count = getattr(model, "n_features_in_", None)
+vectorizer_feature_count = len(vectorizer.get_feature_names_out())
+
+if model_feature_count != vectorizer_feature_count:
+    raise RuntimeError(
+        "Production model and vectorizer are incompatible: "
+        f"model expects {model_feature_count} features, "
+        f"but vectorizer produces {vectorizer_feature_count}."
+    )
 
 
 @app.route("/")
@@ -56,14 +64,8 @@ def predict():
     cleaned_text = normalize_text(text)
     features = vectorizer.transform([cleaned_text])
 
-    # Pass the same feature names and order used during training
-    features_df = pd.DataFrame(
-        features.toarray(),
-        columns=vectorizer.get_feature_names_out()
-    )
 
-    # Predict emotion
-    prediction = int(model.predict(features_df)[0])
+    prediction = int(model.predict(features.toarray())[0])
 
     result = "Happy" if prediction == 1 else "Sad"
 
