@@ -36,7 +36,10 @@ with open(vectorizer_path, "rb") as file:
 model_feature_count = getattr(model, "n_features_in_", None)
 vectorizer_feature_count = len(vectorizer.get_feature_names_out())
 
-if model_feature_count != vectorizer_feature_count:
+if (
+    model_feature_count is not None
+    and model_feature_count != vectorizer_feature_count
+):
     raise RuntimeError(
         "Production model and vectorizer are incompatible: "
         f"model expects {model_feature_count} features, "

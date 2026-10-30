@@ -2,6 +2,7 @@ import importlib
 import sys
 from unittest.mock import patch
 
+import numpy as np
 import pandas as pd
 import mlflow.sklearn
 import pytest
@@ -19,7 +20,7 @@ class FakeVectorizer:
         return type(
             "Features",
             (),
-            {"toarray": lambda self: [[1, 0]]}
+            {"toarray": lambda self: np.array([[1, 0]])}
         )()
 
     def get_feature_names_out(self):
