@@ -3,6 +3,8 @@ mlops-pipeline
 
 An end-to-end machine learning pipeline for sentiment analysis, covering data ingestion, preprocessing, TF-IDF feature engineering, model training, and evaluation. Built with Python, scikit-learn, and DVC for reproducible and automated ML workflows.
 
+The application can be packaged and deployed as a Docker container.
+
 Project Organization
 ------------
 
