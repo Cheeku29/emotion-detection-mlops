@@ -76,3 +76,30 @@ jobs:
       - name: Push Docker image to AWS ECR
         run: |
           docker push 222238779214.dkr.ecr.ap-southeast-2.amazonaws.com/arindam7084_ecr:latest
+
+      - name: Deploy to EC2
+        if: success()
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
+            aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+            aws configure set default.region ap-southeast-2
+
+            aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 222238779214.dkr.ecr.ap-southeast-2.amazonaws.com
+
+            docker pull 222238779214.dkr.ecr.ap-southeast-2.amazonaws.com/arindam7084_ecr:latest
+
+            docker stop emotion-app || true
+            docker rm emotion-app || true
+
+            docker run -d \
+              --restart unless-stopped \
+              -p 80:5000 \
+              -e DAGSHUB_PAT="${{ secrets.DAGSHUB_PAT }}" \
+              --name emotion-app \
+              222238779214.dkr.ecr.ap-southeast-2.amazonaws.com/arindam7084_ecr:latest
